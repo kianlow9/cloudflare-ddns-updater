@@ -6,12 +6,18 @@ auth_method="token"                                 # Set to "global" for Global
 auth_key=""                                         # Your API Token or Global API Key
 zone_identifier=""                                  # Can be found in the "Overview" tab of your domain
 record_name=""                                      # Which record you want to be synced
-ttl="3600"                                          # Set the DNS TTL (seconds)
+ttl="3600"                                          # Set the DNS TTL (seconds) - If you set it to 1 it will put TTL to Automatic
 proxy="false"                                       # Set the proxy to true or false
 sitename=""                                         # Title of site "Example Site"
 slackchannel=""                                     # Slack Channel #example
 slackuri=""                                         # URI for Slack WebHook "https://hooks.slack.com/services/xxxxx"
 discorduri=""                                       # URI for Discord WebHook "https://discordapp.com/api/webhooks/xxxxx"
+
+# IMAP Email Login Details
+hostname="imap.example.com"
+port="993"
+username="your_username"
+password="your_password"
 
 
 ###########################################
@@ -120,4 +126,24 @@ case "$update" in
     }' $discorduri
   fi
   exit 0;;
+
+# Email Settings
+if [ -z "$to" ] || [ -z "$hostname" ] || [ -z "$port" ] || [ -z "$username" ] || [ -z "$password" ]; then
+  echo "Email settings not configured. Skipping notification email."
+  exit 0
+else
+  echo "Sending notification email."
+  subject="Update Notification"
+  body="The site $sitename has been updated. The new IP address for $record_name is $ip."
+  echo "$body" | mailx -v \
+    -S smtp-use-starttls \
+    -S ssl-verify=ignore \
+    -S smtp-auth=login \
+    -S smtp="$hostname:$port" \
+    -S from="$username" \
+    -S smtp-user="$username" \
+    -S smtp-pass="$password" \
+    -s "$subject" \
+    "$to"
+fi
 esac
