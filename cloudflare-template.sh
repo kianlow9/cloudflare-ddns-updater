@@ -13,11 +13,15 @@ slackchannel=""                                     # Slack Channel #example
 slackuri=""                                         # URI for Slack WebHook "https://hooks.slack.com/services/xxxxx"
 discorduri=""                                       # URI for Discord WebHook "https://discordapp.com/api/webhooks/xxxxx"
 
-# IMAP Email Login Details
-hostname="imap.example.com"
-port="993"
-username="your_username"
-password="your_password"
+#!/bin/bash
+
+# Define the email details
+hostname="your.email.provider.com"
+login_email="your.email@example.com"
+login_password="yourpassword"
+tls_enabled="true"
+recipient_email="recipient@example.com"
+send_as_name="Your Name"
 
 
 ###########################################
@@ -145,5 +149,22 @@ else
     -S smtp-pass="$password" \
     -s "$subject" \
     "$to"
+
+# Construct the mailx command with the given details
+command="echo \"This is a test email\" | mailx"
+command+=" -r \"$send_as_name <$login_email>\""
+command+=" -s \"Test email from $hostname\""
+command+=" -S smtp=\"$hostname\""
+command+=" -S smtp-auth=login"
+command+=" -S smtp-auth-user=\"$login_email\""
+command+=" -S smtp-auth-password=\"$login_password\""
+if [[ "$tls_enabled" == "true" ]]; then
+  command+=" -S smtp-use-starttls"
+fi
+command+=" \"$recipient_email\""
+
+# Send the email
+eval "$command"
+
 fi
 esac
