@@ -13,6 +13,18 @@ slackchannel=""                                     # Slack Channel #example
 slackuri=""                                         # URI for Slack WebHook "https://hooks.slack.com/services/xxxxx"
 discorduri=""                                       # URI for Discord WebHook "https://discordapp.com/api/webhooks/xxxxx"
 
+
+# Email 
+
+FROM_ADDRESS="your-email-address@example.com"
+TO_ADDRESS="recipient-email-address@example.com"
+SUBJECT="Website Update Alert"
+IMAP_HOST="imap.example.com"
+IMAP_PORT="993"
+IMAP_USERNAME="your-username"
+IMAP_PASSWORD="your-password"
+
+
 ###########################################
 ## Check if we have a public IP
 ###########################################
@@ -118,6 +130,14 @@ case "$update" in
       "content" : "'"$sitename"' Updated: '$record_name''"'"'s'""' new IP Address is '$ip'"
     }' $discorduri
   fi
+  
+MESSAGE="The IP address for '$sitename' has been updated to '$ip'."
+echo -e "From: $FROM_ADDRESS\nTo: $TO_ADDRESS\nSubject: $SUBJECT\n\n$MESSAGE" \
+  | openssl s_client -quiet -connect "$IMAP_HOST:$IMAP_PORT" -crlf -starttls imap \
+  -CApath /etc/ssl/certs/ -auth PLAIN -user "$IMAP_USERNAME" -password "$IMAP_PASSWORD" \
+  2>/dev/null | sed '1,/^)$/d'
+  fi
+  
   exit 0;;
 
 fi
