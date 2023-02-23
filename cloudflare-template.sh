@@ -13,17 +13,6 @@ slackchannel=""                                     # Slack Channel #example
 slackuri=""                                         # URI for Slack WebHook "https://hooks.slack.com/services/xxxxx"
 discorduri=""                                       # URI for Discord WebHook "https://discordapp.com/api/webhooks/xxxxx"
 
-#!/bin/bash
-
-# Define the email details
-hostname="your.email.provider.com"
-login_email="your.email@example.com"
-login_password="yourpassword"
-tls_enabled="true"
-recipient_email="recipient@example.com"
-send_as_name="Your Name"
-
-
 ###########################################
 ## Check if we have a public IP
 ###########################################
@@ -130,41 +119,6 @@ case "$update" in
     }' $discorduri
   fi
   exit 0;;
-
-# Email Settings
-if [ -z "$to" ] || [ -z "$hostname" ] || [ -z "$port" ] || [ -z "$username" ] || [ -z "$password" ]; then
-  echo "Email settings not configured. Skipping notification email."
-  exit 0
-else
-  echo "Sending notification email."
-  subject="Update Notification"
-  body="The site $sitename has been updated. The new IP address for $record_name is $ip."
-  echo "$body" | mailx -v \
-    -S smtp-use-starttls \
-    -S ssl-verify=ignore \
-    -S smtp-auth=login \
-    -S smtp="$hostname:$port" \
-    -S from="$username" \
-    -S smtp-user="$username" \
-    -S smtp-pass="$password" \
-    -s "$subject" \
-    "$to"
-
-# Construct the mailx command with the given details
-command="echo \"This is a test email\" | mailx"
-command+=" -r \"$send_as_name <$login_email>\""
-command+=" -s \"Test email from $hostname\""
-command+=" -S smtp=\"$hostname\""
-command+=" -S smtp-auth=login"
-command+=" -S smtp-auth-user=\"$login_email\""
-command+=" -S smtp-auth-password=\"$login_password\""
-if [[ "$tls_enabled" == "true" ]]; then
-  command+=" -S smtp-use-starttls"
-fi
-command+=" \"$recipient_email\""
-
-# Send the email
-eval "$command"
 
 fi
 esac
